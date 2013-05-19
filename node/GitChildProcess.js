@@ -4,9 +4,7 @@
 (function () {
     "use strict";
     
-    var childProcess = require("child_process"),
-        spawn = childProcess.spawn;
-    
+    var exec    = require('child_process').exec;
     var DOMAIN = "gitManager",
         RUN_COMMAND = "runCommand";
     
@@ -15,15 +13,22 @@
             throw new Error("No arbitrary executions with git-integration please!");
         }
         
-        console.log(command.split(' '));
-        
         var acmd = command.match(/[a-zA-Z0-9_\\\/\.\-]+|'[^']+'|"[^"]+"/g),
             git = acmd.shift(), // this should be git, or we have a problem
             proc,
             error = "",
             output = "";
         
-        proc = spawn(git, acmd, {cwd: directoryPath});
+        //proc = spawn(git, acmd, {cwd: directoryPath});        
+        
+        console.log(command.split(' '));
+        console.log(command);
+        
+        output += directoryPath;
+        
+        proc = exec(command, {cwd: directoryPath}, function (error, stdout, stderr) {
+            //callback(error, stdout);
+        });
         
         proc.stdout.on("data", function (data) {
             output += data;
@@ -32,6 +37,7 @@
         // append errors to output instead, so that we get all of the content back in
         // the output field in the UI.  We don't really need to distinguish.
         proc.stderr.on("data", function (err) {
+            output += "[Error]\n";
             output += err;
         });
         
